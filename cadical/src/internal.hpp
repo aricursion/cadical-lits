@@ -35,6 +35,8 @@ extern "C" {
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <set>
+#include <map>
 
 /*------------------------------------------------------------------------*/
 
@@ -264,6 +266,14 @@ struct Internal {
   vector<StatTracer *> stat_tracers; // checkers
 
   Options opts; // run-time options
+  
+  // additions for lit-count
+  std::set<int> litprint_printed_lits;
+  std::map<int, int> litprint_occ_cnts;
+  int litprint_print_cnt;
+  int litprint_next;
+
+
   Stats stats;  // statistics
 #ifndef QUIET
   Profiles profiles;         // time profiles for various functions

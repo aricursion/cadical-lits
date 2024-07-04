@@ -107,6 +107,11 @@ OPTION( instantiateclslim, 3,  2,2e9,0,0,1, "minimum clause size") \
 OPTION( instantiateocclim, 1,  1,2e9,2,0,1, "maximum occurrence limit") \
 OPTION( instantiateonce,   1,  0,  1,0,0,1, "instantiate each clause once") \
 OPTION( lidrup,            0,  0,  1,0,0,1, "linear incremental proof format") \
+OPTION( litcount,          1,  1,2e9,0,0,0, "how many literals to print") \
+OPTION( litgap,          1e2,  0,2e9,0,0,0, "gap between literals printed") \
+OPTION( litgapgrow,        1,  1,2e9,0,0,0, "how much to increase gap between literals printed") \
+OPTION( litprint,          0,  0,  1,0,0,0, "Whether to print learned literals")\
+OPTION( litstart,        5e3,  0,2e9,0,0,0, "After how many learned clauses to start printing literals") \
 LOGOPT( log,               0,  0,  1,0,0,0, "enable logging") \
 LOGOPT( logsort,           0,  0,  1,0,0,0, "sort logged clauses") \
 OPTION( lrat,              0,  0,  1,0,0,1, "use LRAT proof format") \

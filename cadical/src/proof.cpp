@@ -516,6 +516,67 @@ void Proof::add_derived_clause () {
   for (auto &tracer : tracers) {
     tracer->add_derived_clause (clause_id, redundant, clause, proof_chain);
   }
+  // starting code for cadical-lit-count
+  if (internal->opts.litprint) {
+    for (const int lit : clause) {
+      int abs_lit = abs (lit);
+      if (internal->litprint_occ_cnts.count (abs_lit)) {
+        internal->litprint_occ_cnts[abs_lit] += 1;
+      } else {
+        internal->litprint_occ_cnts.insert ({abs_lit, 1});
+      }
+    }
+
+    bool print_lit = false;
+
+    if (!internal->litprint_print_cnt &&
+        internal->stats.learned.clauses >= internal->opts.litstart)
+      print_lit = true;
+
+    if (internal->litprint_print_cnt &&
+        internal->stats.learned.clauses >= internal->litprint_next)
+      print_lit = true;
+
+    if (print_lit) {
+      std::vector<std::pair<int, int>> sorted_litprint_counts (
+          internal->litprint_occ_cnts.begin (),
+          internal->litprint_occ_cnts.end ());
+
+      std::sort (
+          sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
+          [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
+            return a.second > b.second;
+          });
+
+      bool empty = true;
+      for (pair<int, int> p : sorted_litprint_counts) {
+        if (internal->val (p.first) == 0 &&
+            !(internal->litprint_printed_lits.count (p.first))) {
+          printf ("c lit %d 0\n", p.first);
+          empty = false;
+          internal->litprint_print_cnt++;
+          internal->litprint_printed_lits.insert (p.first);
+
+          int lit_mult =
+              (internal->opts.litgapgrow > 1)
+                  ? internal->litprint_print_cnt * internal->opts.litgapgrow
+                  : 1;
+          internal->litprint_next = internal->stats.learned.clauses +
+                                    internal->opts.litgap * lit_mult;
+          break;
+        }
+      }
+
+      if (empty ||
+          internal->opts.litcount <= internal->litprint_print_cnt) {
+        fflush (stdout);
+        exit (1);
+      }
+    }
+  }
+
+  // end code for cadical-lit-count
+
   proof_chain.clear ();
   clause.clear ();
   clause_id = 0;
