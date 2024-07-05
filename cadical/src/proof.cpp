@@ -556,6 +556,8 @@ void Proof::add_derived_clause () {
           empty = false;
           internal->litprint_print_cnt++;
           internal->litprint_printed_lits.insert (p.first);
+          if (internal->opts.litrecent)
+            internal->litprint_occ_cnts = {};
 
           int lit_mult =
               (internal->opts.litgapgrow > 1)
