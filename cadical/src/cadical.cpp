@@ -883,6 +883,25 @@ int App::main (int argc, char **argv) {
     solver->message ("writing result to '%s'", write_result_path);
   }
 
+  if (solver->internal->opts.litprint && !solver->internal->litprint_print_cnt) {
+
+    std::vector<std::pair<int, int>> sorted_litprint_counts (
+        solver->internal->litprint_occ_cnts.begin (),
+        solver->internal->litprint_occ_cnts.end ());
+
+    std::sort (
+        sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
+        [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
+          return a.second > b.second;
+        });
+    for (pair<int, int> p : sorted_litprint_counts) {
+      if (!solver->internal->litprint_printed_lits.count(p.first)) {
+        printf("c lit %d 0\n", p.first);
+        break;
+      }
+    }
+  }
+
   if (res == 10) {
     if (status)
       fputs ("s SATISFIABLE\n", write_result_file);
