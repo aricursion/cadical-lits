@@ -552,7 +552,7 @@ void Proof::add_derived_clause () {
       for (pair<int, int> p : sorted_litprint_counts) {
         if (internal->val (p.first) == 0 &&
             !(internal->litprint_printed_lits.count (p.first))) {
-          printf ("c lit %d 0\n", p.first);
+          printf ("c lit %d 0 # runtime: %lf\n", p.first, internal->process_time());
           empty = false;
           internal->litprint_print_cnt++;
           internal->litprint_printed_lits.insert (p.first);
