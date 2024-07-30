@@ -838,6 +838,7 @@ struct Internal {
   // Transitive reduction of binary implication graph in 'transred.cpp'
   //
   void transred ();
+  int64_t total_propagations();
 
   // We monitor the maximum size and glue of clauses during 'reduce' and
   // thus can predict if a redundant extended clause is likely to be kept in
@@ -1571,6 +1572,7 @@ inline bool Internal::search_limits_hit () {
 }
 
 /*------------------------------------------------------------------------*/
+
 
 } // namespace CaDiCaL
 

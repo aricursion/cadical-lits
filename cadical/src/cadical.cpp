@@ -896,7 +896,10 @@ int App::main (int argc, char **argv) {
         });
     for (pair<int, int> p : sorted_litprint_counts) {
       if (!solver->internal->litprint_printed_lits.count(p.first)) {
-        printf("c lit %d 0\n", p.first);
+        printf ("c lit %d 0 # runtime: %lf # props: %lld\n", p.first,
+                  solver->internal->process_time (),
+                  solver->internal->total_propagations());
+
         break;
       }
     }

@@ -988,4 +988,16 @@ bool Internal::traverse_clauses (ClauseIterator &it) {
   return true;
 }
 
+int64_t Internal::total_propagations() {
+    int64_t props = 0;
+    props += stats.propagations.probe;
+    props += stats.propagations.walk;
+    props += stats.propagations.cover;
+    props += stats.propagations.search;
+    props += stats.propagations.vivify;
+    props += stats.propagations.transred;
+    props += stats.propagations.instantiate;
+    return props;
+}
+
 } // namespace CaDiCaL
