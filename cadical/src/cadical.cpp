@@ -900,7 +900,7 @@ int App::main (int argc, char **argv) {
                   solver->internal->process_time (),
                   solver->internal->total_propagations());
 
-        break;
+        exit(0);
       }
     }
   }
