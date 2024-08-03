@@ -883,25 +883,30 @@ int App::main (int argc, char **argv) {
     solver->message ("writing result to '%s'", write_result_path);
   }
 
-  if (solver->internal->opts.litprint && !solver->internal->litprint_print_cnt) {
-
-    std::vector<std::pair<int, int>> sorted_litprint_counts (
-        solver->internal->litprint_occ_cnts.begin (),
-        solver->internal->litprint_occ_cnts.end ());
-
-    std::sort (
-        sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
-        [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
-          return a.second > b.second;
-        });
-    for (pair<int, int> p : sorted_litprint_counts) {
-      if (!solver->internal->litprint_printed_lits.count(p.first)) {
-          printf("here\n");
-        printf ("c lit %d 0 # runtime: %lf # props: %lld\n", p.first,
-                  solver->internal->process_time (),
-                  solver->internal->total_propagations());
-
+  if (solver->internal->opts.litprint &&
+      !solver->internal->litprint_print_cnt) {
+    if (solver->internal->opts.litset) {
+        solver->internal->print_most_common_lits(solver->internal->opts.litsetsize);
         exit(0);
+    } else {
+      std::vector<std::pair<int, int>> sorted_litprint_counts (
+          solver->internal->litprint_occ_cnts.begin (),
+          solver->internal->litprint_occ_cnts.end ());
+
+      std::sort (
+          sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
+          [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
+            return a.second > b.second;
+          });
+      for (pair<int, int> p : sorted_litprint_counts) {
+        if (!solver->internal->litprint_printed_lits.count (p.first)) {
+          printf ("here\n");
+          printf ("c lit %d 0 # runtime: %lf # props: %lld\n", p.first,
+                  solver->internal->process_time (),
+                  solver->internal->total_propagations ());
+
+          exit (0);
+        }
       }
     }
   }
