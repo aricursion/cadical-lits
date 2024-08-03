@@ -21,8 +21,8 @@ Internal::Internal ()
       propagated2 (0), propergated (0), best_assigned (0),
       target_assigned (0), no_conflict_until (0), unsat_constraint (false),
       marked_failed (true), num_assigned (0), proof (0), lratbuilder (0),
-      opts (this), litprint_printed_lits({}), litprint_occ_cnts({}),
-      litprint_print_cnt(0), litprint_next(0),
+      opts (this), litprint_printed_lits ({}), litprint_occ_cnts ({}),
+      litprint_print_cnt (0), litprint_next (0),
 #ifndef QUIET
       profiles (this), force_phase_messages (false),
 #endif
@@ -48,7 +48,7 @@ Internal::Internal ()
 }
 
 Internal::~Internal () {
-  delete[](char *) dummy_binary;
+  delete[] (char *) dummy_binary;
   for (const auto &c : clauses)
     delete_clause (c);
   if (proof)
@@ -988,16 +988,47 @@ bool Internal::traverse_clauses (ClauseIterator &it) {
   return true;
 }
 
-int64_t Internal::total_propagations() {
-    int64_t props = 0;
-    props += stats.propagations.probe;
-    props += stats.propagations.walk;
-    props += stats.propagations.cover;
-    props += stats.propagations.search;
-    props += stats.propagations.vivify;
-    props += stats.propagations.transred;
-    props += stats.propagations.instantiate;
-    return props;
+int64_t Internal::total_propagations () {
+  int64_t props = 0;
+  props += stats.propagations.probe;
+  props += stats.propagations.walk;
+  props += stats.propagations.cover;
+  props += stats.propagations.search;
+  props += stats.propagations.vivify;
+  props += stats.propagations.transred;
+  props += stats.propagations.instantiate;
+  return props;
+}
+
+void Internal::print_most_common_lits (int n) {
+  std::vector<std::pair<int, int>> sorted_litprint_counts (
+      internal->litprint_occ_cnts.begin (),
+      internal->litprint_occ_cnts.end ());
+  std::sort (
+      sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
+      [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
+        return a.second > b.second;
+      });
+  printf ("c {");
+  int idx = 0;
+  int num_printed = 0;
+  while (num_printed < n) {
+    auto p = sorted_litprint_counts[idx];
+    if (internal->val (p.first) == 0 &&
+        !internal->litprint_printed_lits.count (p.first)) {
+      printf ("%d : %d", p.first, p.second);
+      internal->litprint_printed_lits.insert (p.first);
+      internal->litprint_print_cnt += 1;
+      if (num_printed != n - 1)
+        printf (", ");
+      num_printed += 1;
+    }
+    idx += 1;
+  }
+  if (internal->opts.litrecent)
+    internal->litprint_occ_cnts = {};
+  printf ("}\n");
+  fflush (stdout);
 }
 
 } // namespace CaDiCaL

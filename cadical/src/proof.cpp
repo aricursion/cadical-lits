@@ -538,41 +538,43 @@ void Proof::add_derived_clause () {
       print_lit = true;
 
     if (print_lit) {
-      std::vector<std::pair<int, int>> sorted_litprint_counts (
-          internal->litprint_occ_cnts.begin (),
-          internal->litprint_occ_cnts.end ());
+      if (internal->opts.litset) {
+        internal->print_most_common_lits (internal->opts.litsetsize);
+      } else {
+        std::vector<std::pair<int, int>> sorted_litprint_counts (
+            internal->litprint_occ_cnts.begin (),
+            internal->litprint_occ_cnts.end ());
 
-      std::sort (
-          sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
-          [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
-            return a.second > b.second;
-          });
+        std::sort (sorted_litprint_counts.begin (),
+                   sorted_litprint_counts.end (),
+                   [] (const std::pair<int, int> &a,
+                       const std::pair<int, int> &b) {
+                     return a.second > b.second;
+                   });
 
-      bool empty = true;
-      for (pair<int, int> p : sorted_litprint_counts) {
-        if (internal->val (p.first) == 0 &&
-            !(internal->litprint_printed_lits.count (p.first))) {
-          printf ("c lit %d 0 # runtime: %lf # props: %lld\n", p.first,
-                  internal->process_time (),
-                  internal->total_propagations());
-          empty = false;
-          internal->litprint_print_cnt++;
-          internal->litprint_printed_lits.insert (p.first);
-          if (internal->opts.litrecent)
-            internal->litprint_occ_cnts = {};
+        for (pair<int, int> p : sorted_litprint_counts) {
+          if (internal->val (p.first) == 0 &&
+              !(internal->litprint_printed_lits.count (p.first))) {
+            printf ("c lit %d 0 # runtime: %lf # props: %lld\n", p.first,
+                    internal->process_time (),
+                    internal->total_propagations ());
+            internal->litprint_print_cnt++;
+            internal->litprint_printed_lits.insert (p.first);
+            if (internal->opts.litrecent)
+              internal->litprint_occ_cnts = {};
 
-          int lit_mult =
-              (internal->opts.litgapgrow > 1)
-                  ? internal->litprint_print_cnt * internal->opts.litgapgrow
-                  : 1;
-          internal->litprint_next = internal->stats.learned.clauses +
-                                    internal->opts.litgap * lit_mult;
-          break;
+            int lit_mult = (internal->opts.litgapgrow > 1)
+                               ? internal->litprint_print_cnt *
+                                     internal->opts.litgapgrow
+                               : 1;
+            internal->litprint_next = internal->stats.learned.clauses +
+                                      internal->opts.litgap * lit_mult;
+            break;
+          }
         }
       }
 
-      if (empty ||
-          internal->opts.litcount <= internal->litprint_print_cnt) {
+      if (internal->opts.litcount <= internal->litprint_print_cnt) {
         fflush (stdout);
         exit (1);
       }

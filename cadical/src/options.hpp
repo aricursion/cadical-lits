@@ -112,6 +112,8 @@ OPTION( litgap,          1e2,  0,2e9,0,0,0, "gap between literals printed") \
 OPTION( litgapgrow,        1,  1,2e9,0,0,0, "how much to increase gap between literals printed") \
 OPTION( litprint,          0,  0,  1,0,0,0, "Whether to print learned literals")\
 OPTION( litrecent,         0,  0,  1,0,0,0, "Whether to clear the occurence count after learning")\
+OPTION( litset,            0,  0,  1,0,0,0, "Whether to print a set of literals instead of just one")\
+OPTION( litsetsize,        5,  0,2e9,0,0,0, "How big should the set be")\
 OPTION( litstart,        5e3,  0,2e9,0,0,0, "After how many learned clauses to start printing literals") \
 LOGOPT( log,               0,  0,  1,0,0,0, "enable logging") \
 LOGOPT( logsort,           0,  0,  1,0,0,0, "sort logged clauses") \
