@@ -839,7 +839,7 @@ struct Internal {
   //
   void transred ();
   int64_t total_propagations();
-  void print_most_common_lits(int n);
+  void print_most_common_lits(int n, bool extra);
 
   // We monitor the maximum size and glue of clauses during 'reduce' and
   // thus can predict if a redundant extended clause is likely to be kept in

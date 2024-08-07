@@ -539,7 +539,7 @@ void Proof::add_derived_clause () {
 
     if (print_lit) {
       if (internal->opts.litset) {
-        internal->print_most_common_lits (internal->opts.litsetsize);
+        internal->print_most_common_lits (internal->opts.litsetsize, internal->opts.litprintextra);
       } else {
         std::vector<std::pair<int, int>> sorted_litprint_counts (
             internal->litprint_occ_cnts.begin (),

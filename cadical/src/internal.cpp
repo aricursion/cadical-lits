@@ -1000,7 +1000,7 @@ int64_t Internal::total_propagations () {
   return props;
 }
 
-void Internal::print_most_common_lits (int n) {
+void Internal::print_most_common_lits (int n, bool extra) {
   std::vector<std::pair<int, int>> sorted_litprint_counts (
       internal->litprint_occ_cnts.begin (),
       internal->litprint_occ_cnts.end ());
@@ -1027,7 +1027,11 @@ void Internal::print_most_common_lits (int n) {
   }
   if (internal->opts.litrecent)
     internal->litprint_occ_cnts = {};
-  printf ("}\n");
+  printf ("}");
+  if (extra) {
+    printf (" time: %f", internal->process_time ());
+  }
+  printf ("\n");
   fflush (stdout);
 }
 

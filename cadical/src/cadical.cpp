@@ -886,8 +886,10 @@ int App::main (int argc, char **argv) {
   if (solver->internal->opts.litprint &&
       !solver->internal->litprint_print_cnt) {
     if (solver->internal->opts.litset) {
-        solver->internal->print_most_common_lits(solver->internal->opts.litsetsize);
-        exit(0);
+      solver->internal->print_most_common_lits (
+          solver->internal->opts.litsetsize,
+          solver->internal->opts.litprintextra);
+      exit (0);
     } else {
       std::vector<std::pair<int, int>> sorted_litprint_counts (
           solver->internal->litprint_occ_cnts.begin (),
