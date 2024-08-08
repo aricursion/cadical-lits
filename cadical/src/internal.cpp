@@ -1012,7 +1012,7 @@ void Internal::print_most_common_lits (int n, bool extra) {
   printf ("c {");
   int idx = 0;
   int num_printed = 0;
-  while (num_printed < n) {
+  while (num_printed < n && (size_t) idx < sorted_litprint_counts.size()) {
     auto p = sorted_litprint_counts[idx];
     if (internal->val (p.first) == 0 &&
         !internal->litprint_printed_lits.count (p.first)) {
