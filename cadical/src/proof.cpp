@@ -1,4 +1,5 @@
 #include "internal.hpp"
+#include "litprint.hpp"
 
 namespace CaDiCaL {
 
@@ -527,51 +528,11 @@ void Proof::add_derived_clause () {
       }
     }
 
-    bool print_lit = false;
-
-    if (!internal->litprint_print_cnt &&
-        internal->stats.learned.clauses >= internal->opts.litstart)
-      print_lit = true;
-
-    if (internal->litprint_print_cnt &&
-        internal->stats.learned.clauses >= internal->litprint_next)
-      print_lit = true;
-
-    if (print_lit) {
+    if (should_print_lit (internal)) {
       if (internal->opts.litset) {
-        internal->print_most_common_lits (internal->opts.litsetsize, internal->opts.litprintextra);
+        print_lit_set (internal);
       } else {
-        std::vector<std::pair<int, int>> sorted_litprint_counts (
-            internal->litprint_occ_cnts.begin (),
-            internal->litprint_occ_cnts.end ());
-
-        std::sort (sorted_litprint_counts.begin (),
-                   sorted_litprint_counts.end (),
-                   [] (const std::pair<int, int> &a,
-                       const std::pair<int, int> &b) {
-                     return a.second > b.second;
-                   });
-
-        for (pair<int, int> p : sorted_litprint_counts) {
-          if (internal->val (p.first) == 0 &&
-              !(internal->litprint_printed_lits.count (p.first))) {
-            printf ("c lit %d 0 # runtime: %lf # props: %lld\n", p.first,
-                    internal->process_time (),
-                    internal->total_propagations ());
-            internal->litprint_print_cnt++;
-            internal->litprint_printed_lits.insert (p.first);
-            if (internal->opts.litrecent)
-              internal->litprint_occ_cnts = {};
-
-            int lit_mult = (internal->opts.litgapgrow > 1)
-                               ? internal->litprint_print_cnt *
-                                     internal->opts.litgapgrow
-                               : 1;
-            internal->litprint_next = internal->stats.learned.clauses +
-                                      internal->opts.litgap * lit_mult;
-            break;
-          }
-        }
+        print_lits (internal);
       }
 
       if (internal->opts.litcount <= internal->litprint_print_cnt) {

@@ -112,6 +112,7 @@ OPTION( litgap,          1e2,  0,2e9,0,0,0, "gap between literals printed") \
 OPTION( litgapgrow,        1,  1,2e9,0,0,0, "how much to increase gap between literals printed") \
 OPTION( litprint,          0,  0,  1,0,0,0, "Whether to print learned literals")\
 OPTION( litprintextra,     0,  0,  1,0,0,0, "Whether to print extra info with learned literals")\
+OPTION( litprintmode,      0,  0,  2,0,0,0, "The mode by which to compute the literals. 0 = naive occurences, 1 = pos * neg, 2 = weighted by shorter clauses")\
 OPTION( litrecent,         0,  0,  1,0,0,0, "Whether to clear the occurence count after learning")\
 OPTION( litset,            0,  0,  1,0,0,0, "Whether to print a set of literals instead of just one")\
 OPTION( litsetsize,        5,  0,2e9,0,0,0, "How big should the set be")\
