@@ -884,14 +884,14 @@ int App::main (int argc, char **argv) {
     solver->message ("writing result to '%s'", write_result_path);
   }
 
-  if (should_print_lit (solver->internal)) {
-    if (solver->internal->opts.litset) {
-      print_lit_set (solver->internal);
-    } else {
-      print_lit (solver->internal);
-    }
-    exit(57); // special code for exit with bottom out
+  // if (should_print_lit (solver->internal)) {
+  if (solver->internal->opts.litset) {
+    print_lit_set (solver->internal);
+  } else {
+    print_lit (solver->internal);
   }
+  exit (57); // special code for exit with bottom out
+  //}
 
   if (res == 10) {
     if (status)
