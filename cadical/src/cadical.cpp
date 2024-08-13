@@ -888,7 +888,7 @@ int App::main (int argc, char **argv) {
     if (solver->internal->opts.litset) {
       print_lit_set (solver->internal);
     } else {
-      print_lits (solver->internal);
+      print_lit (solver->internal);
     }
     exit(57); // special code for exit with bottom out
   }

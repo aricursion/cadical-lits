@@ -1,4 +1,5 @@
 #include "internal.hpp"
+#include <utility>
 
 namespace CaDiCaL {
 
@@ -21,14 +22,14 @@ Internal::Internal ()
       propagated2 (0), propergated (0), best_assigned (0),
       target_assigned (0), no_conflict_until (0), unsat_constraint (false),
       marked_failed (true), num_assigned (0), proof (0), lratbuilder (0),
-      opts (this), litprint_printed_lits ({}), litprint_occ_cnts ({}),
-      litprint_print_cnt (0), litprint_next (0),
+      opts (this), profiles (this), force_phase_messages (false),
+      arena (this), prefix ("c "),
 #ifndef QUIET
-      profiles (this), force_phase_messages (false),
+      internal (this), external (0),
 #endif
-      arena (this), prefix ("c "), internal (this), external (0),
-      termination_forced (false), vars (this->max_var),
-      lits (this->max_var) {
+      termination_forced (false), vars (this->max_var), lits (this->max_var), litprint_printed_lits ({}),
+      litprint_occ_cnts ({}), litprint_print_cnt (0),
+      litprint_next (0) {
   control.push_back (Level (0, 0));
 
   // The 'dummy_binary' is used in 'try_to_subsume_clause' to fake a real
@@ -1000,39 +1001,65 @@ int64_t Internal::total_propagations () {
   return props;
 }
 
-void Internal::print_most_common_lits (int n, bool extra) {
-  std::vector<std::pair<int, int>> sorted_litprint_counts (
-      internal->litprint_occ_cnts.begin (),
-      internal->litprint_occ_cnts.end ());
-  std::sort (
-      sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
-      [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
-        return a.second > b.second;
-      });
-  printf ("c {");
-  int idx = 0;
-  int num_printed = 0;
-  while (num_printed < n && (size_t) idx < sorted_litprint_counts.size()) {
-    auto p = sorted_litprint_counts[idx];
-    if (internal->val (p.first) == 0 &&
-        !internal->litprint_printed_lits.count (p.first)) {
-      printf ("%d : %d", p.first, p.second);
-      internal->litprint_printed_lits.insert (p.first);
-      internal->litprint_print_cnt += 1;
-      if (num_printed != n - 1)
-        printf (", ");
-      num_printed += 1;
-    }
-    idx += 1;
-  }
-  if (internal->opts.litrecent)
-    internal->litprint_occ_cnts = {};
-  printf ("}");
-  if (extra) {
-    printf (" time: %f", internal->process_time ());
-  }
-  printf ("\n");
-  fflush (stdout);
+void Internal::init_lit_info (int pos_lit) {
+  assert (pos_lit > 0);
+  if (!litprint_occ_cnts.count (pos_lit))
+    litprint_occ_cnts.insert (
+        std::make_pair (pos_lit, LitInfo {0, 0, 1, 1}));
+}
+
+void Internal::add_occ (int lit) {
+  int key = abs (lit);
+  if (lit > 0)
+    litprint_occ_cnts[key].pos_occ += 1;
+  else
+    litprint_occ_cnts[key].neg_occ += 1;
+}
+
+void Internal::add_occ_weighted (int lit, int clause_len) {
+  int key = abs (lit);
+  if (lit > 0)
+    litprint_occ_cnts[key].pos_weighted_occ +=
+        1.0 / clause_len;
+  else
+    litprint_occ_cnts[key].neg_weighted_occ +=
+        1.0 / clause_len;
+}
+
+int Internal::occ (int lit) {
+  int key = abs (lit);
+
+  if (lit > 0)
+    return litprint_occ_cnts[key].pos_occ;
+  else
+    return litprint_occ_cnts[key].neg_occ;
+}
+
+int Internal::sum_occ (int lit) {
+  return Internal::occ(lit) + Internal::occ(-lit);
+}
+
+int Internal::prod_occ (int lit) {
+  int key = abs (lit);
+  return litprint_occ_cnts[key].pos_occ * litprint_occ_cnts[key].neg_occ;
+}
+
+float Internal::weighted_occ (int lit) {
+  int key = abs (lit);
+  if (lit > 0)
+    return litprint_occ_cnts[key].pos_weighted_occ;
+  else
+    return litprint_occ_cnts[key].neg_weighted_occ;
+}
+
+float Internal::sum_weighted_occ(int lit) {
+  return Internal::weighted_occ(lit) + Internal::weighted_occ(-lit);
+}
+
+float Internal::prod_weighted_occ (int lit) {
+  int key = abs (lit);
+  return litprint_occ_cnts[key].pos_weighted_occ *
+         litprint_occ_cnts[key].neg_weighted_occ;
 }
 
 } // namespace CaDiCaL

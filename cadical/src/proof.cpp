@@ -522,9 +522,12 @@ void Proof::add_derived_clause () {
     for (const int lit : clause) {
       int abs_lit = abs (lit);
       if (internal->litprint_occ_cnts.count (abs_lit)) {
-        internal->litprint_occ_cnts[abs_lit] += 1;
+          internal->add_occ(lit);
+          internal->add_occ_weighted(lit, clause.size());
       } else {
-        internal->litprint_occ_cnts.insert ({abs_lit, 1});
+        internal->init_lit_info(abs_lit);
+        internal->add_occ(lit);
+        internal->add_occ_weighted(lit, clause.size());
       }
     }
 
@@ -532,7 +535,7 @@ void Proof::add_derived_clause () {
       if (internal->opts.litset) {
         print_lit_set (internal);
       } else {
-        print_lits (internal);
+        print_lit (internal);
       }
 
       if (internal->opts.litcount <= internal->litprint_print_cnt) {

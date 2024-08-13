@@ -31,12 +31,12 @@ extern "C" {
 // Common 'C++' headers.
 
 #include <algorithm>
+#include <map>
 #include <queue>
+#include <set>
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <set>
-#include <map>
 
 /*------------------------------------------------------------------------*/
 
@@ -266,15 +266,8 @@ struct Internal {
   vector<StatTracer *> stat_tracers; // checkers
 
   Options opts; // run-time options
-  
-  // additions for lit-count
-  std::set<int> litprint_printed_lits;
-  std::map<int, int> litprint_occ_cnts;
-  int litprint_print_cnt;
-  int litprint_next;
 
-
-  Stats stats;  // statistics
+  Stats stats; // statistics
 #ifndef QUIET
   Profiles profiles;         // time profiles for various functions
   bool force_phase_messages; // force 'phase (...)' messages
@@ -838,8 +831,8 @@ struct Internal {
   // Transitive reduction of binary implication graph in 'transred.cpp'
   //
   void transred ();
-  int64_t total_propagations();
-  void print_most_common_lits(int n, bool extra);
+  int64_t total_propagations ();
+  void print_most_common_lits (int n, bool extra);
 
   // We monitor the maximum size and glue of clauses during 'reduce' and
   // thus can predict if a redundant extended clause is likely to be kept in
@@ -1444,6 +1437,27 @@ struct Internal {
   // Warning messages.
   //
   void warning (const char *, ...) CADICAL_ATTRIBUTE_FORMAT (2, 3);
+
+  // additions for lit-count
+  struct LitInfo {
+    int pos_occ;
+    int neg_occ;
+    float pos_weighted_occ;
+    float neg_weighted_occ;
+  };
+  std::set<int> litprint_printed_lits;
+  std::map<int, LitInfo> litprint_occ_cnts;
+  int litprint_print_cnt;
+  int litprint_next;
+  void init_lit_info (int pos_lit);
+  void add_occ (int lit);
+  void add_occ_weighted (int lit, int clause_len);
+  int occ(int lit);
+  int sum_occ(int lit);
+  int prod_occ(int lit);
+  float weighted_occ(int lit);
+  float sum_weighted_occ(int lit);
+  float prod_weighted_occ(int lit);
 };
 
 // Fatal internal error which leads to abort.
@@ -1573,7 +1587,6 @@ inline bool Internal::search_limits_hit () {
 }
 
 /*------------------------------------------------------------------------*/
-
 
 } // namespace CaDiCaL
 

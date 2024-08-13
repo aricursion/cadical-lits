@@ -1,31 +1,70 @@
 #include "internal.hpp"
+#include <algorithm>
+#include <functional>
+#include <tuple>
+
+static std::tuple<int, float> select_lit (CaDiCaL::Internal *internal) {
+  std::function<float (CaDiCaL::Internal *, int)> get_score;
+  switch (internal->opts.litprintmode) {
+  case 0:
+    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
+      return static_cast<float> (internal->sum_occ (pos_lit));
+    };
+    break;
+  case 1:
+    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
+      return static_cast<float> (internal->prod_occ (pos_lit));
+    };
+    break;
+  case 2:
+    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
+      return internal->sum_weighted_occ (pos_lit);
+    };
+    break;
+  case 3:
+    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
+      return internal->prod_weighted_occ (pos_lit);
+    };
+    break;
+  default:
+    printf ("fatal error\n");
+    exit (1);
+  }
+  std::vector<int> lits;
+  for (auto const &x : internal->litprint_occ_cnts) {
+    lits.push_back (x.first);
+  }
+
+  std::sort (lits.begin (), lits.end (),
+             [get_score, internal] (int lit1, int lit2) {
+               return get_score (internal, lit1) >
+                      get_score (internal, lit2);
+             });
+  for (auto const &lit : lits) {
+    if (internal->val (lit) == 0 &&
+        !internal->litprint_printed_lits.count (lit)) {
+      return {lit, get_score (internal, lit)};
+    }
+  }
+
+  return {0, 0.0};
+}
 
 void print_lit_set (CaDiCaL::Internal *internal) {
   int n = internal->opts.litsetsize;
   bool extra = internal->opts.litprintextra;
-  std::vector<std::pair<int, int>> sorted_litprint_counts (
-      internal->litprint_occ_cnts.begin (),
-      internal->litprint_occ_cnts.end ());
-  std::sort (
-      sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
-      [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
-        return a.second > b.second;
-      });
   printf ("c {");
-  int idx = 0;
-  int num_printed = 0;
-  while (num_printed < n && (size_t) idx < sorted_litprint_counts.size ()) {
-    auto p = sorted_litprint_counts[idx];
-    if (internal->val (p.first) == 0 &&
-        !internal->litprint_printed_lits.count (p.first)) {
-      printf ("%d : %d", p.first, p.second);
-      internal->litprint_printed_lits.insert (p.first);
-      internal->litprint_print_cnt += 1;
-      if (num_printed != n - 1)
-        printf (", ");
-      num_printed += 1;
-    }
-    idx += 1;
+  for (int i = 0; i < n; i++) {
+    auto selected = select_lit (internal);
+    int lit = std::get<0> (selected);
+    if (lit <= 0)
+      break;
+    float score = std::get<1> (selected);
+    printf ("%d : %f", lit, score);
+    internal->litprint_print_cnt += 1;
+    internal->litprint_printed_lits.insert (lit);
+    if (i != n - 1)
+      printf (", ");
   }
   if (internal->opts.litrecent)
     internal->litprint_occ_cnts = {};
@@ -37,36 +76,24 @@ void print_lit_set (CaDiCaL::Internal *internal) {
   fflush (stdout);
 }
 
-void print_lits (CaDiCaL::Internal *internal) {
-  std::vector<std::pair<int, int>> sorted_litprint_counts (
-      internal->litprint_occ_cnts.begin (),
-      internal->litprint_occ_cnts.end ());
+void print_lit (CaDiCaL::Internal *internal) {
+  auto selected = select_lit (internal);
+  int lit = std::get<0> (selected);
+  if (lit <= 0)
+    return;
+  printf ("c lit %d 0 # runtime: %lf # props: %lld\n", lit,
+          internal->process_time (), internal->total_propagations ());
+  internal->litprint_print_cnt++;
+  internal->litprint_printed_lits.insert (lit);
+  if (internal->opts.litrecent)
+    internal->litprint_occ_cnts = {};
 
-  std::sort (
-      sorted_litprint_counts.begin (), sorted_litprint_counts.end (),
-      [] (const std::pair<int, int> &a, const std::pair<int, int> &b) {
-        return a.second > b.second;
-      });
-
-  for (std::pair<int, int> p : sorted_litprint_counts) {
-    if (internal->val (p.first) == 0 &&
-        !(internal->litprint_printed_lits.count (p.first))) {
-      printf ("c lit %d 0 # runtime: %lf # props: %lld\n", p.first,
-              internal->process_time (), internal->total_propagations ());
-      internal->litprint_print_cnt++;
-      internal->litprint_printed_lits.insert (p.first);
-      if (internal->opts.litrecent)
-        internal->litprint_occ_cnts = {};
-
-      int lit_mult =
-          (internal->opts.litgapgrow > 1)
-              ? internal->litprint_print_cnt * internal->opts.litgapgrow
-              : 1;
-      internal->litprint_next = internal->stats.learned.clauses +
-                                internal->opts.litgap * lit_mult;
-      break;
-    }
-  }
+  int lit_mult =
+      (internal->opts.litgapgrow > 1)
+          ? internal->litprint_print_cnt * internal->opts.litgapgrow
+          : 1;
+  internal->litprint_next =
+      internal->stats.learned.clauses + internal->opts.litgap * lit_mult;
 }
 
 bool should_print_lit (CaDiCaL::Internal *internal) {
