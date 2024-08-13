@@ -3,47 +3,34 @@
 #include <functional>
 #include <tuple>
 
-static std::tuple<int, float> select_lit (CaDiCaL::Internal *internal) {
-  std::function<float (CaDiCaL::Internal *, int)> get_score;
-  switch (internal->opts.litprintmode) {
-  case 0:
-    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
-      return static_cast<float> (internal->sum_occ (pos_lit));
-    };
-    break;
-  case 1:
-    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
-      return static_cast<float> (internal->prod_occ (pos_lit));
-    };
-    break;
-  case 2:
-    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
+static std::tuple<int, double> select_lit (CaDiCaL::Internal *internal) {
+  auto get_score = [&internal] (int pos_lit) {
+    switch (internal->opts.litprintmode) {
+    case 0:
+      return static_cast<double> (internal->sum_occ (pos_lit));
+    case 1:
+      return static_cast<double> (internal->prod_occ (pos_lit));
+    case 2:
       return internal->sum_weighted_occ (pos_lit);
-    };
-    break;
-  case 3:
-    get_score = [] (CaDiCaL::Internal *internal, int pos_lit) {
+    case 3:
       return internal->prod_weighted_occ (pos_lit);
-    };
-    break;
-  default:
-    printf ("fatal error\n");
-    exit (1);
-  }
+    default:
+      printf ("Fatal error\n");
+      exit (1);
+    }
+  };
   std::vector<int> lits;
   for (auto const &x : internal->litprint_occ_cnts) {
     lits.push_back (x.first);
   }
 
-  std::sort (lits.begin (), lits.end (),
-             [get_score, internal] (int lit1, int lit2) {
-               return get_score (internal, lit1) >
-                      get_score (internal, lit2);
-             });
+  std::sort (lits.begin (), lits.end (), [get_score] (int lit1, int lit2) {
+    return get_score (lit1) > get_score (lit2);
+  });
   for (auto const &lit : lits) {
     if (internal->val (lit) == 0 &&
         !internal->litprint_printed_lits.count (lit)) {
-      return {lit, get_score (internal, lit)};
+      return {lit, get_score (lit)};
     }
   }
 
@@ -59,8 +46,8 @@ void print_lit_set (CaDiCaL::Internal *internal) {
     int lit = std::get<0> (selected);
     if (lit <= 0)
       break;
-    float score = std::get<1> (selected);
-    printf ("%d : %f", lit, score);
+    double score = std::get<1> (selected);
+    printf ("%d : %lf", lit, score);
     internal->litprint_print_cnt += 1;
     internal->litprint_printed_lits.insert (lit);
     if (i != n - 1)

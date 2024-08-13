@@ -1026,7 +1026,7 @@ void Internal::add_occ_weighted (int lit, int clause_len) {
         1.0 / clause_len;
 }
 
-int Internal::occ (int lit) {
+long Internal::occ (int lit) {
   int key = abs (lit);
 
   if (lit > 0)
@@ -1035,16 +1035,16 @@ int Internal::occ (int lit) {
     return litprint_occ_cnts[key].neg_occ;
 }
 
-int Internal::sum_occ (int lit) {
+long Internal::sum_occ (int lit) {
   return Internal::occ(lit) + Internal::occ(-lit);
 }
 
-int Internal::prod_occ (int lit) {
+long Internal::prod_occ (int lit) {
   int key = abs (lit);
   return litprint_occ_cnts[key].pos_occ * litprint_occ_cnts[key].neg_occ;
 }
 
-float Internal::weighted_occ (int lit) {
+double Internal::weighted_occ (int lit) {
   int key = abs (lit);
   if (lit > 0)
     return litprint_occ_cnts[key].pos_weighted_occ;
@@ -1052,11 +1052,11 @@ float Internal::weighted_occ (int lit) {
     return litprint_occ_cnts[key].neg_weighted_occ;
 }
 
-float Internal::sum_weighted_occ(int lit) {
+double Internal::sum_weighted_occ(int lit) {
   return Internal::weighted_occ(lit) + Internal::weighted_occ(-lit);
 }
 
-float Internal::prod_weighted_occ (int lit) {
+double Internal::prod_weighted_occ (int lit) {
   int key = abs (lit);
   return litprint_occ_cnts[key].pos_weighted_occ *
          litprint_occ_cnts[key].neg_weighted_occ;

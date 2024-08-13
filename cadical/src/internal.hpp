@@ -1440,10 +1440,10 @@ struct Internal {
 
   // additions for lit-count
   struct LitInfo {
-    int pos_occ;
-    int neg_occ;
-    float pos_weighted_occ;
-    float neg_weighted_occ;
+    long pos_occ;
+    long neg_occ;
+    double pos_weighted_occ;
+    double neg_weighted_occ;
   };
   std::set<int> litprint_printed_lits;
   std::map<int, LitInfo> litprint_occ_cnts;
@@ -1452,12 +1452,12 @@ struct Internal {
   void init_lit_info (int pos_lit);
   void add_occ (int lit);
   void add_occ_weighted (int lit, int clause_len);
-  int occ(int lit);
-  int sum_occ(int lit);
-  int prod_occ(int lit);
-  float weighted_occ(int lit);
-  float sum_weighted_occ(int lit);
-  float prod_weighted_occ(int lit);
+  long occ(int lit);
+  long sum_occ(int lit);
+  long prod_occ(int lit);
+  double weighted_occ(int lit);
+  double sum_weighted_occ(int lit);
+  double prod_weighted_occ(int lit);
 };
 
 // Fatal internal error which leads to abort.
