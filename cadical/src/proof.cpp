@@ -522,12 +522,12 @@ void Proof::add_derived_clause () {
     for (const int lit : clause) {
       int abs_lit = abs (lit);
       if (internal->litprint_occ_cnts.count (abs_lit)) {
-          internal->add_occ(lit);
-          internal->add_occ_weighted(lit, clause.size());
+        internal->add_occ (lit);
+        internal->add_occ_weighted (lit, clause.size ());
       } else {
-        internal->init_lit_info(abs_lit);
-        internal->add_occ(lit);
-        internal->add_occ_weighted(lit, clause.size());
+        internal->init_lit_info (abs_lit);
+        internal->add_occ (lit);
+        internal->add_occ_weighted (lit, clause.size ());
       }
     }
 
@@ -543,6 +543,35 @@ void Proof::add_derived_clause () {
         exit (1);
       }
     }
+  }
+  if (internal->opts.litgraph) {
+    if (!internal->opts.litprint) {
+      for (const int lit : clause) {
+        int abs_lit = abs (lit);
+        if (internal->litprint_occ_cnts.count (abs_lit)) {
+          internal->add_occ (lit);
+          internal->add_occ_weighted (lit, clause.size ());
+        } else {
+          internal->init_lit_info (abs_lit);
+          internal->add_occ (lit);
+          internal->add_occ_weighted (lit, clause.size ());
+        }
+      }
+    }
+    for (const int lit : clause) {
+      int abs_lit = abs (lit);
+      double score = lit_score (internal, abs_lit);
+      if (internal->litprint_graph.count (abs_lit)) {
+        internal->litprint_graph[abs_lit].push_back ({clause_id, score});
+      } else {
+        internal->litprint_graph.insert ({abs_lit, {{clause_id, score}}});
+      }
+    }
+  }
+
+  if (clause_id >= (uint64_t) internal->opts.litgraphcutoff) {
+    dump_json (internal);
+    exit (1);
   }
 
   // end code for cadical-lit-count

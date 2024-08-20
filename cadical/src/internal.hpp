@@ -1449,6 +1449,7 @@ struct Internal {
   std::map<int, LitInfo> litprint_occ_cnts;
   int litprint_print_cnt;
   int litprint_next;
+  map<int, vector<pair<int, double>>> litprint_graph;
   void init_lit_info (int pos_lit);
   void add_occ (int lit);
   void add_occ_weighted (int lit, int clause_len);

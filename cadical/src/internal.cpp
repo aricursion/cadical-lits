@@ -27,9 +27,10 @@ Internal::Internal ()
 #ifndef QUIET
       internal (this), external (0),
 #endif
-      termination_forced (false), vars (this->max_var), lits (this->max_var), litprint_printed_lits ({}),
-      litprint_occ_cnts ({}), litprint_print_cnt (0),
-      litprint_next (0) {
+      termination_forced (false), vars (this->max_var),
+      lits (this->max_var), litprint_printed_lits ({}),
+      litprint_occ_cnts ({}), litprint_print_cnt (0), litprint_next (0),
+      litprint_graph ({}) {
   control.push_back (Level (0, 0));
 
   // The 'dummy_binary' is used in 'try_to_subsume_clause' to fake a real
@@ -1005,7 +1006,7 @@ void Internal::init_lit_info (int pos_lit) {
   assert (pos_lit > 0);
   if (!litprint_occ_cnts.count (pos_lit))
     litprint_occ_cnts.insert (
-        std::make_pair (pos_lit, LitInfo {0, 0, 1, 1}));
+        std::make_pair (pos_lit, LitInfo{0, 0, 1, 1}));
 }
 
 void Internal::add_occ (int lit) {
@@ -1019,11 +1020,9 @@ void Internal::add_occ (int lit) {
 void Internal::add_occ_weighted (int lit, int clause_len) {
   int key = abs (lit);
   if (lit > 0)
-    litprint_occ_cnts[key].pos_weighted_occ +=
-        1.0 / clause_len;
+    litprint_occ_cnts[key].pos_weighted_occ += 1.0 / clause_len;
   else
-    litprint_occ_cnts[key].neg_weighted_occ +=
-        1.0 / clause_len;
+    litprint_occ_cnts[key].neg_weighted_occ += 1.0 / clause_len;
 }
 
 long Internal::occ (int lit) {
@@ -1036,7 +1035,7 @@ long Internal::occ (int lit) {
 }
 
 long Internal::sum_occ (int lit) {
-  return Internal::occ(lit) + Internal::occ(-lit);
+  return Internal::occ (lit) + Internal::occ (-lit);
 }
 
 long Internal::prod_occ (int lit) {
@@ -1052,8 +1051,8 @@ double Internal::weighted_occ (int lit) {
     return litprint_occ_cnts[key].neg_weighted_occ;
 }
 
-double Internal::sum_weighted_occ(int lit) {
-  return Internal::weighted_occ(lit) + Internal::weighted_occ(-lit);
+double Internal::sum_weighted_occ (int lit) {
+  return Internal::weighted_occ (lit) + Internal::weighted_occ (-lit);
 }
 
 double Internal::prod_weighted_occ (int lit) {

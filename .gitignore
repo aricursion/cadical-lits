@@ -2,3 +2,5 @@ build
 makefile
 compile_commands.json
 .cache/
+venv/
+*.json
