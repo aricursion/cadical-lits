@@ -50,6 +50,7 @@ public:
   Proof (Internal *);
   ~Proof ();
 
+  bool new_redundant;           // cadical-lits
   void connect (LratBuilder *lb) { lratbuilder = lb; }
   void connect (Tracer *t) { tracers.push_back (t); }
   void disconnect (Tracer *t);

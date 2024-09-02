@@ -113,6 +113,7 @@ OPTION( litgapgrow,        1,  1,2e9,0,0,0, "how much to increase gap between li
 OPTION( litgraph,          0,  0,  1,0,0,0, "Whether to emit the litgraph") \
 OPTION( litgraphcutoff,  5e5,  0,2e9,0,0,0, "Litgraph cutoff number") \
 OPTION( litprint,          0,  0,  1,0,0,0, "Whether to print learned literals")\
+OPTION( litprintconflict,  0,  0,  1,0,0,0, "Whether to only track literals learned from conflicts")\
 OPTION( litprintextra,     0,  0,  1,0,0,0, "Whether to print extra info with learned literals")\
 OPTION( litprintmode,      0,  0,  3,0,0,0, "The mode by which to compute the literals. 0 = naive occurences, 1 = pos * neg, 2 = weighted by shorter clauses naive, 3 = weighted by shorter clauses pos * neg")\
 OPTION( litrecent,         0,  0,  1,0,0,0, "Whether to clear the occurence count after learning")\

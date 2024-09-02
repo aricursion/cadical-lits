@@ -102,14 +102,14 @@ void dump_json (CaDiCaL::Internal *internal) {
   FILE *fp = fopen ("litgraph.json", "w");
   fprintf (fp, "{\n");
   uint64_t ctr = 0;
-  std::vector<std::pair<int, std::vector<std::pair<int, double>>>>
-      graph_pairs = {};
+  // std::vector<std::pair<int, std::vector<std::pair<int, double>>>>
+  //     graph_pairs = {};
+  // for (auto pair : internal->litprint_graph) {
+  //   if (internal->val (pair.first) == 0) {
+  //     graph_pairs.push_back ({pair.first, pair.second});
+  //   }
+  // }
   for (auto pair : internal->litprint_graph) {
-    if (internal->val (pair.first) == 0) {
-      graph_pairs.push_back ({pair.first, pair.second});
-    }
-  }
-  for (auto pair : graph_pairs) {
     ctr += 1;
     int lit = pair.first;
     auto scores = pair.second;
@@ -123,7 +123,7 @@ void dump_json (CaDiCaL::Internal *internal) {
       }
     }
     fprintf (fp, "]");
-    if (ctr != graph_pairs.size ()) {
+    if (ctr != internal->litprint_graph.size ()) {
       fprintf (fp, ",");
     }
     fprintf (fp, "\n");

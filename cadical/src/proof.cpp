@@ -518,7 +518,8 @@ void Proof::add_derived_clause () {
     tracer->add_derived_clause (clause_id, redundant, clause, proof_chain);
   }
   // starting code for cadical-lit-count
-  if (internal->opts.litprint) {
+  if (internal->opts.litprint &&
+      (!internal->opts.litprintconflict || new_redundant)) {
     for (const int lit : clause) {
       int abs_lit = abs (lit);
       if (internal->litprint_occ_cnts.count (abs_lit)) {
@@ -545,7 +546,8 @@ void Proof::add_derived_clause () {
     }
   }
   if (internal->opts.litgraph) {
-    if (!internal->opts.litprint) {
+    if (!internal->opts.litprint &&
+        (!internal->opts.litprintconflict || new_redundant)) {
       for (const int lit : clause) {
         int abs_lit = abs (lit);
         if (internal->litprint_occ_cnts.count (abs_lit)) {
@@ -561,17 +563,20 @@ void Proof::add_derived_clause () {
     for (const int lit : clause) {
       int abs_lit = abs (lit);
       double score = lit_score (internal, abs_lit);
+      if (clause.size () == 1) {
+        score = 0;
+      }
       if (internal->litprint_graph.count (abs_lit)) {
         internal->litprint_graph[abs_lit].push_back ({clause_id, score});
       } else {
         internal->litprint_graph.insert ({abs_lit, {{clause_id, score}}});
       }
     }
-  }
-
-  if (clause_id >= (uint64_t) internal->opts.litgraphcutoff) {
-    dump_json (internal);
-    exit (1);
+    new_redundant = false;
+    if (clause_id >= (uint64_t) internal->opts.litgraphcutoff) {
+      dump_json (internal);
+      exit (1);
+    }
   }
 
   // end code for cadical-lit-count

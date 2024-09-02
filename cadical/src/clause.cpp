@@ -505,6 +505,7 @@ Clause *Internal::new_learned_redundant_clause (int glue) {
   }
   assert (watching ());
   watch_clause (res);
+  proof->new_redundant = true;
   return res;
 }
 
