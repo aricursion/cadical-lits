@@ -572,12 +572,13 @@ void Proof::add_derived_clause () {
         internal->litprint_graph.insert ({abs_lit, {{clause_id, score}}});
       }
     }
-    new_redundant = false;
     if (clause_id >= (uint64_t) internal->opts.litgraphcutoff) {
       dump_json (internal);
       exit (1);
     }
   }
+
+  new_redundant = false;
 
   // end code for cadical-lit-count
 
