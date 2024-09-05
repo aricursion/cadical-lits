@@ -1020,9 +1020,9 @@ void Internal::add_occ (int lit) {
 void Internal::add_occ_weighted (int lit, int clause_len) {
   int key = abs (lit);
   if (lit > 0)
-    litprint_occ_cnts[key].pos_weighted_occ += 1.0 / std::sqrt(clause_len);
+    litprint_occ_cnts[key].pos_weighted_occ += 1.0 / (clause_len * clause_len);
   else
-    litprint_occ_cnts[key].neg_weighted_occ += 1.0 / std::sqrt(clause_len);
+    litprint_occ_cnts[key].neg_weighted_occ += 1.0 / (clause_len * clause_len);
 }
 
 long Internal::occ (int lit) {
